@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"> 
+	<title>上传文件</title>
+	<link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css">  
+	<script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <style type="text/css">
+        html{
+            padding: 10pt;
+        }
+    </style>
+</head>
+<body>
+
+<div role="form">
+    <div id="info" class="alert alert-info">上传文件最大{{max_file_size}}M</div>
+	<div class="form-group">
+		<label for="pwd">密码</label>
+		<input type="password" class="form-control" id="pwd" placeholder="请输入密码">
+	</div>
+	<div class="form-group">
+		<label for="file">上传文件</label>
+		<input type="file" id="file">
+		<p class="help-block">上传路径：{{path}}</p>
+	</div>
+    <button class="btn btn-default" onclick="upload()">上传</button>
+    
+    <script>
+        function setInfo(info){
+            document.getElementById("info").innerText = ""+info;
+        }
+        function upload(){
+            setInfo("正在上传...");
+            if(window.loading){
+                return;
+            }
+            window.loading = true;
+            var formData = new FormData();
+            var pwd = document.getElementById("pwd").value;
+            var fileField = document.getElementById("file");
+
+            formData.append('pwd', pwd);
+            formData.append('file', fileField.files[0]);
+
+            var uri = '{{uri}}/upload';
+            uri = uri.replace('&#x2F;', '/');
+            fetch(uri, {
+                method: 'POST',
+                body: formData
+            })
+            .catch(error => {
+                window.loading = false;
+                setInfo("上传失败:"+error);
+            })
+            .then(response => {
+                window.loading = false;
+                var success = response.status >= 200 && response.status < 300;
+                response.text().then(function(msg) {
+                    setInfo(msg);
+                });
+            });
+        }
+    </script>
+</div>
+
+</body>
+</html>
